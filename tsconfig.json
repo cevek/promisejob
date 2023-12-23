@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "outDir": "dist",
+        "inlineSourceMap": true,
+        "declaration": true,
+        "declarationMap": true
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "name": "promisejob",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "typings": "dist",
+    "keywords": [],
+    "author": "cevek",
+    "license": "ISC"
+}
