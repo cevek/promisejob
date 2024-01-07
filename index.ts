@@ -13,7 +13,7 @@ export class PromiseJob {
     }
     protected runNext() {
         this.activeWorkers--;
-        if (this.activeWorkers === 0) {
+        if (this.activeWorkers === 0 && this.workers.size === 0) {
             this.donePromiseResolve();
         }
         if (this.activeWorkers < this.params.maxParallel) {
