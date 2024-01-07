@@ -37,8 +37,12 @@ export class PromiseJob {
         }
     }
     async run() {
-        for (let i = 0; i < this.params.maxParallel; i++) {
-            this.runJob();
+        if (this.workers.size === 0) {
+            this.donePromiseResolve();
+        } else {
+            for (let i = 0; i < this.params.maxParallel; i++) {
+                this.runJob();
+            }
         }
         await this.donePromise;
     }
