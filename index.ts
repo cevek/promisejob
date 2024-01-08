@@ -1,49 +1,51 @@
-export class PromiseJob {
-    protected workers = new Set<() => Promise<unknown>>();
-    protected activeWorkers = 0;
-    protected donePromise: Promise<void>;
-    protected donePromiseResolve!: () => void;
-    constructor(protected params: {maxParallel: number}) {
-        this.donePromise = new Promise((resolve) => {
-            this.donePromiseResolve = resolve;
-        });
-    }
-    add(worker: () => Promise<unknown>) {
-        this.workers.add(worker);
-    }
-    protected runNext() {
-        this.activeWorkers--;
-        if (this.activeWorkers === 0 && this.workers.size === 0) {
-            this.donePromiseResolve();
+export async function runParallel<T extends (() => Promise<unknown>)[] | []>(
+    jobs: T,
+    params: {limit: number},
+): Promise<{[P in keyof T]: Awaited<ReturnType<T[P]>>}> {
+    type Res = {[P in keyof T]: Awaited<ReturnType<T[P]>>};
+    const result = [] as Res;
+    let activeWorkers = 0;
+    let currentIdx = 0;
+    let resolvePromise!: (v: Res) => void;
+    let rejectPromise!: (err: unknown) => void;
+    let rejected = false;
+    const promise = new Promise<Res>((resolve, reject) => {
+        resolvePromise = resolve;
+        rejectPromise = reject;
+    });
+    function finishJob(jobIndex: number, value: unknown) {
+        if (rejected) return;
+        result[jobIndex] = value;
+        activeWorkers--;
+        if (activeWorkers === 0 && jobs.length === currentIdx) {
+            resolvePromise(result);
         }
-        if (this.activeWorkers < this.params.maxParallel) {
-            this.runJob();
+        if (activeWorkers < params.limit) {
+            runJob();
         }
     }
-    protected runJob() {
-        if (this.workers.size === 0) {
+    function runJob() {
+        if (currentIdx === jobs.length || rejected) {
             return;
         }
-        const firstJob = this.workers.values().next().value as () => Promise<unknown>;
-        this.workers.delete(firstJob);
-        this.activeWorkers++;
-        try {
-            firstJob().finally(() => {
-                this.runNext();
-            });
-        } catch (err) {
-            console.error(err);
-            this.runNext();
+        const jobIndex = currentIdx;
+        currentIdx++;
+        const job = jobs[jobIndex];
+        activeWorkers++;
+        job().then(
+            (v) => finishJob(jobIndex, v),
+            (err) => {
+                rejected = true;
+                rejectPromise(err);
+            },
+        );
+    }
+    if (jobs.length === 0) {
+        resolvePromise(result);
+    } else {
+        for (let i = 0; i < Math.min(jobs.length, params.limit); i++) {
+            runJob();
         }
     }
-    async run() {
-        if (this.workers.size === 0) {
-            this.donePromiseResolve();
-        } else {
-            for (let i = 0; i < this.params.maxParallel; i++) {
-                this.runJob();
-            }
-        }
-        await this.donePromise;
-    }
+    return await promise;
 }

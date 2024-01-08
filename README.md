@@ -1,19 +1,21 @@
-# promisejob
+# parallel-jobs
 
-A small utility for running promises in parallel with limiting running jobs.
+A small utility for running functions in parallel with limiting running jobs.
 
 ## Install
 ```
-npm i promisejob
+npm i parallel-jobs
 ```
 
 ## Usage
 ```
-const promiseJob = new PromiseJob({maxParallel: 10});
-// add some jobs
-promiseJob.add(async () => {
-   await fetch(...)
-})
-await promiseJob.run();
-// all jobs are finished
+import {runParallel} from 'parallel-jobs';
+
+console.log(await runParallel([
+   async () => 1, 
+   async () => 2, 
+   async () => 3
+], {limit: 2})) // [1, 2, 3]
 ```
+
+if some async function will throw error `runParallel` will also throw

@@ -1,10 +1,31 @@
 {
-    "name": "promisejob",
-    "version": "1.0.2",
+    "name": "parallel-jobs",
+    "version": "1.0.1",
     "description": "",
     "main": "dist/index.js",
     "typings": "dist",
-    "keywords": [],
+    "keywords": [
+        "promise",
+        "parallel",
+        "concurent",
+        "limit"
+    ],
+    "scripts": {
+        "test": "jest",
+        "prepublishOnly": "tsc && jest"
+    },
+    "files": [
+        "index.ts",
+        "dist/index.js",
+        "dist/index.d.ts",
+        "dist/index.d.ts.map"
+    ],
     "author": "cevek",
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+        "@types/jest": "^29.5.11",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.3.3"
+    }
 }
